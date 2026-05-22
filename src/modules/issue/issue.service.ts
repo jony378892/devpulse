@@ -25,7 +25,7 @@ const createIssueToDB = async (payload: any, user: any) => {
 
 const getAllIssueFromDB = async () => {
   const result = await pool.query(`
-        SELECT * FROM issues
+        SELECT * FROM issues 
         `);
 
   if (result.rows.length === 0) {
@@ -35,4 +35,48 @@ const getAllIssueFromDB = async () => {
   return result;
 };
 
-export { createIssueToDB, getAllIssueFromDB };
+const getSingleIssueFromDB = async (id: string) => {
+  const searchId = Number(id);
+
+  const result = await pool.query(
+    `
+    SELECT * FROM issues where id=$1
+    `,
+    [searchId],
+  );
+  return result;
+};
+
+const updateIssueFromDB = async (
+  id: string,
+  payload: {
+    title: string;
+    description: string;
+    type: string;
+  },
+) => {
+  const { title, description, type } = payload;
+
+  const status = "open";
+
+  const result = await pool.query(
+    `
+        UPDATE issues 
+        SET 
+        title=COALESCE($1,title),
+        description=COALESCE($2,description),
+        type=COALESCE($3,type) 
+        WHERE status=$4 RETURNING *
+        `,
+    [title, description, type, status],
+  );
+
+  return result;
+};
+
+export {
+  createIssueToDB,
+  getAllIssueFromDB,
+  getSingleIssueFromDB,
+  updateIssueFromDB,
+};
