@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { pool } from "../../db/index.ts";
-import { signupUserIntoDB } from "./auth.service.ts";
+import { loginUserIntoDB, signupUserIntoDB } from "./auth.service.ts";
 
-const signup = async (req: Request, res: Response) => {
+const signupUser = async (req: Request, res: Response) => {
   try {
     if (!req.body) {
       return res.status(400).json({ error: "Request body is required" });
@@ -28,4 +28,32 @@ const signup = async (req: Request, res: Response) => {
   }
 };
 
-export { signup };
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { accessToken, userDetails } = await loginUserIntoDB(req.body);
+
+    res.cookie("accessToken", accessToken, {
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        token: accessToken,
+        user: {
+          ...userDetails,
+        },
+      },
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+export { signupUser, loginUser };
