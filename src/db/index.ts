@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { config } from "../config/index.ts";
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: config.connection_string,
 });
 
@@ -30,7 +30,6 @@ const initDB = async () => {
     CREATE TABLE IF NOT EXISTS issues (
     id SERIAL PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
-
     description TEXT NOT NULL
         CHECK (
             LENGTH(
