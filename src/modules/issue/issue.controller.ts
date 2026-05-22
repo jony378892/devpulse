@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import {
   createIssueToDB,
+  deleteIssueFromDB,
   getAllIssueFromDB,
   getSingleIssueFromDB,
   updateIssueFromDB,
@@ -122,4 +123,31 @@ const updateIssue = async (req: Request, res: Response) => {
   }
 };
 
-export { createIssue, getAllIssue, getSingleIssue, updateIssue };
+const deleteIssue = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const result = await deleteIssueFromDB(id as string);
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Issue not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Issue deleted successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: "Can't Update issue",
+      error: error.message,
+    });
+  }
+};
+
+export { createIssue, getAllIssue, getSingleIssue, updateIssue, deleteIssue };
